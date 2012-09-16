@@ -1,5 +1,6 @@
 \documentclass{article}
 
+\usepackage[T1]{fontenc}
 \usepackage{acronym}
 \usepackage{verbatim}
 \usepackage{color}
@@ -26,8 +27,11 @@
 	breakatwhitespace=true,			% automatic line breaking only at whitespace
 	keywordstyle=\color{blue},		% key word color
 	commentstyle=\color{darkgreen},	% comment color
-	stringstyle=\color{blue}		% string literal color
+	stringstyle=\color{blue},		% string literal color
+	escapechar=\$
 }
+
+\newcommand{\dq}{\textquotedbl}
 
 \begin{document}
 \title{A Guide to PygmyOS}
@@ -50,7 +54,7 @@ At the end of this document you will find an API reference. In the following cha
 Let's start with a basic description of your \verb|main.c| source file.
 
 \begin{lstlisting}
-#include "pygmy_profile.h"
+#include $\dq$pygmy_profile.h$\dq$
 
 void main(void)
 {
@@ -62,24 +66,24 @@ So, let's start at the top. For each Pygmy project there should be a file named 
 
 \begin{lstlisting}
 #pragma once
-#include "pygmy_sys.h"
-#include "pygmy_port.h"
-#include "pygmy_com.h"
-#include "pygmy_audio.h"
-#include "pygmy_adc.h"
-#include "pygmy_file.h"
-#include "pygmy_lcd.h"
-#include "pygmy_gui.h"
-#include "pygmy_nvic.h"
-#include "pygmy_rtc.h"
-#include "pygmy_string.h"
-#include "pygmy_web.h"
-#include "profiles/pygmy_nebula.h"
+#include $\dq$pygmy_sys.h$\dq$
+#include $\dq$pygmy_port.h$\dq$
+#include $\dq$pygmy_com.h$\dq$
+#include $\dq$pygmy_audio.h$\dq$
+#include $\dq$pygmy_adc.h$\dq$
+#include $\dq$pygmy_file.h$\dq$
+#include $\dq$pygmy_lcd.h$\dq$
+#include $\dq$pygmy_gui.h$\dq$
+#include $\dq$pygmy_nvic.h$\dq$
+#include $\dq$pygmy_rtc.h$\dq$
+#include $\dq$pygmy_string.h$\dq$
+#include $\dq$pygmy_web.h$\dq$
+#include $\dq$profiles/pygmy_nebula.h$\dq$
 \end{lstlisting}
 
 The first line is for the compiler's pre-processor only, it keeps the header file \verb|pygmy_profile.h| from being included multiple times. The next group is the Pygmy API includes. The only file included in the API sources is \verb|pygmy_profile.h|, which means it is critical to your project, and that every API used must be listed. It may be useful to note that PygmyOS is designed to be compiled with size optimization and including all APIs will not cause a decrease in performance or an increase in code size. In light of this fact, it is generally a good idea to include all the APIs to avoid complications with missing resources as your project evolves.
 
-The last line is the most interesting. In this case the included file is the standard hardware definition for the the Pygmy Nebula board. If a "shield" or "backpack" module or modules are to be used with the main board, they will be included just below the primary board include file. All Pygmy profiles for modules and platforms (main boards) are stored in the folder \verb|pygmy/profiles/|. The file \verb|pygmy_profile.h| must be in the same folder as \verb|main.c|. One other note on \verb|pygmy_profile.h| is that it can be used as the header file for \verb|main.c|.
+The last line is the most interesting. In this case the included file is the standard hardware definition for the the Pygmy Nebula board. If a shield or backpack module or modules are to be used with the main board, they will be included just below the primary board include file. All Pygmy profiles for modules and platforms (main boards) are stored in the folder \verb|pygmy/profiles/|. The file \verb|pygmy_profile.h| must be in the same folder as \verb|main.c|. One other note on \verb|pygmy_profile.h| is that it can be used as the header file for \verb|main.c|.
 
 Let's get back to our \verb|main.c| and finish our analysis. The main function is void and void. No parameters are passed to main or returned by main. Dropping out of main will return to the startup function and an endless loop. Despite this fact, it is still recommended to insert an infinite loop at the end of main. Generally nothing will be executed in the loop.
 
@@ -106,7 +110,7 @@ u16 newSimpleTask(u8 *ucName, u32 ulTimer, PYGMYFUNCPTR EventHandler)
 It's a good idea to have balance before taking a step. It's a good idea to learn to walk before you try to run. In line with this reasoning, we'll start by turning an LED on, LED0 to be specific. LED0 and LED1 are the two user LEDs on the Pygmy Nebula Board. By setting the pin to OUTPUT and setting the pin HIGH, the LED will power on.
 
 \begin{lstlisting}
-#include "pygmy_profile.h"
+#include $\dq$pygmy_profile.h$\dq$
 
 void main(void)
 {
@@ -119,13 +123,13 @@ void main(void)
 Loading and booting this simple program will light up LED0 on the board and wait in the loop. As you can see, the program is incredibly simple. Making the LED blink will be our next task. There are many ways to accomplish this, all reasonably simple. In the example we will use the tasking system to blink the LED. This approach will be much like driving a tack with a sledge hammer. There is a reason for using this specific approach, we will be demonstrating with this simple example how to use the timing and tasking systems. Once you start coding for Pygmy, you'll quickly find the tasking system to be a powerful tool to solve a wide variety of problems.
 
 \begin{lstlisting}
-#include "pygmy_profile.h"
+#include $\dq$pygmy_profile.h$\dq$
 void blink(void);
 void main(void)
 {
 	sysInit();
 	pinConfig(LED0, OUT);
-	newSimpleTask("blink", 100, blink);
+	newSimpleTask($\dq$blink$\dq$, 100, blink);
 	while(1){ ; }
 }
 
@@ -149,7 +153,7 @@ When blink is executed, \verb|pinGet()| returns the current state of \emph{LED0}
 I'll provide another LED blinking example below that alternates the two user LEDs using two threads (yes, it obviously could be done with the one thread). Note in this case that instead of using a static variable to store the state of the LEDs, we are using \verb|pinGet()|. Due to this fact, we must \verb|setPin()| one of the LEDs LOW to start them out opposite to eachother. Why? Simply because the port pins default to HIGH.
 
 \begin{lstlisting}
-#include "pygmy_profile.h"
+#include $\dq$pygmy_profile.h$\dq$
 
 void blink1(void);
 void blink2(void);
@@ -160,8 +164,8 @@ void main(void)
 	pinConfig(LED0, OUT);
 	pinConfig(LED1, OUT);
 	pinSet(LED1, LOW);
-	newSimpleTask("blink1", 100, blink1);
-	newSimpleTask("blink2", 100, blink2);
+	newSimpleTask($\dq$blink1$\dq$, 100, blink1);
+	newSimpleTask($\dq$blink2$\dq$, 100, blink2);
 
 	while(1){ ; }
 }
@@ -241,14 +245,14 @@ Besides the generic IO pins, there are also special purpose pins that may also b
 Now that we have discussed the basics of pin naming, we may continue with our code example of \ac{PWM}. Please note that \emph{LED0} and \emph{LED1} are significantly different electrically in that \emph{LED0} is connected to \ac{GPIO} \emph{PA11} while LED1 is connected to \ac{GPIO} \emph{PA12}. You will find in the reference manual for the MCU (should you have the desire to read said manual) that \emph{PA11} is connected to Timer1 Channel4, while \emph{PA12} is not connected to a timer output at all. This means that the following sample code will only work with \emph{LED0}. \emph{LED1} is strictly a digital IO.
 
 \begin{lstlisting}
-#include "pygmy_profile.h"
+#include $\dq$pygmy_profile.h$\dq$
 
 void flash(void);
 
 void main(void)
 {
 	sysInit();
-	newSimpleTask("flash", 100, flash);
+	newSimpleTask($\dq$flash$\dq$, 100, flash);
 	while(1){ ; }
 }
 
@@ -292,7 +296,7 @@ An important note here is that the Nebula boards running the \emph{F103} and \em
 Our first foray into serial communications will cover configuring the port and sending a string. There are low level and high level interfaces available in Pygmy, but we'll be focused on the high level interface.
 
 \begin{lstlisting}
-#include "pygmy_profile.h"
+#include $\dq$pygmy_profile.h$\dq$
 
 void echoCOM3(void);
 
@@ -300,7 +304,7 @@ void main(void)
 {
 	streamInit();
 	streamSetPut(COM3, putsUSART3);
-	print(COM3, "Hello World");
+	print(COM3, $\dq$Hello World$\dq$);
 	while(1){ ; }
 }
 \end{lstlisting}
@@ -314,7 +318,7 @@ Now we must back track to what happens before the first function call. If you we
 Before transfering control to the user program, the bootloader configures \emph{USART3}, the watchdog, the clocks, and SysTick timer. Since we are using \emph{USART3} connected to USB, we don't have to configure the port (or any other resources configured by the bootloader). The exception would be if we needed to change the baud rate, in which case we would call \verb|comConfig()| as in the example below. Please note that in this example code \verb|comConfig()| is being called to demonstrate usage, but isn't actually required.
 
 \begin{lstlisting}
-#include "pygmy_profile.h"
+#include $\dq$pygmy_profile.h$\dq$
 void comtest(void);
 
 u8 globalBuffer[ 128 ];
@@ -332,7 +336,7 @@ void main(void)
 
 void comtest(void)
 {
-	print(COM3, "%c", streamGetChar(COM3));
+	print(COM3, $\dq$%c$\dq$, streamGetChar(COM3));
 }
 \end{lstlisting}
 
